@@ -11,11 +11,63 @@ typedef struct {
   int x, y;
 } Navio;
 
-typedef struct {
-  int tabuleiro[10][10];
-  int quantidadeNavios;
-  Navio **navios;
-} Tabuleiro;
+int foraDoTabuleiro(int x, int y, int tabuleiro[TAM_TAB][TAM_TAB]) {
+  if (x < 0 || x >= TAM_TAB)
+    return 1;
+  if (y < 0 || y >= TAM_TAB)
+    return 1;
+  return 0;
+}
+
+void atirarCone(int x, int y, int tabuleiro[TAM_TAB][TAM_TAB]) {
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j <= i; ++j) {
+      if (!foraDoTabuleiro(x + j, y + i, tabuleiro)) {
+        tabuleiro[y + i][x + j] = 5;
+      }
+      if (!foraDoTabuleiro(x - j, y + i, tabuleiro)) {
+        tabuleiro[y + i][x - j] = 5;
+      }
+    }
+  }
+}
+
+void atirarCruz(int x, int y, int tabuleiro[TAM_TAB][TAM_TAB]) {
+  if (foraDoTabuleiro(x, y, tabuleiro)) {
+    return;
+  }
+
+  if (!foraDoTabuleiro(x, y - 1, tabuleiro)) {
+    tabuleiro[y - 1][x] = 5;
+  }
+
+  if (!foraDoTabuleiro(x, y + 1, tabuleiro)) {
+    tabuleiro[y + 1][x] = 5;
+  }
+
+  for (int i = -2; i <= 2; ++i) {
+    if (!foraDoTabuleiro(x + i, y, tabuleiro)) {
+      tabuleiro[y][x + i] = 5;
+    }
+  }
+}
+
+void atirarOctaedro(int x, int y, int tabuleiro[TAM_TAB][TAM_TAB], int range) {
+  if (foraDoTabuleiro(x, y, tabuleiro)) {
+    return;
+  }
+
+  for (int i = -range; i <= range; ++i) {
+    for (int j = 0; j < range - abs(i); ++j) {
+      if (!foraDoTabuleiro(x + j, y + i, tabuleiro)) {
+        tabuleiro[y + i][x + j] = 5;
+      }
+      if (!foraDoTabuleiro(x - j, y + i, tabuleiro)) {
+        tabuleiro[y + i][x - j] = 5;
+      }
+    }
+  }
+}
 
 int verificarPosicao(int x, int y, int tabuleiro[TAM_TAB][TAM_TAB],
                      NavioPosicao posicao) {
@@ -79,7 +131,10 @@ int main() {
 
   Navio navio = novoNavio(H, 2, 0, tabuleiro);
   Navio navio2 = novoNavio(V, 9, 8, tabuleiro);
-  Navio navio3 = novoNavio(H, 5, 0, tabuleiro);
+
+  atirarCone(3, 3, tabuleiro);
+  atirarCruz(7, 5, tabuleiro);
+  atirarOctaedro(2, 4, tabuleiro, 4);
 
   for (int i = 0; i < TAM_TAB; i++) {
     for (int j = 0; j < TAM_TAB; ++j) {
